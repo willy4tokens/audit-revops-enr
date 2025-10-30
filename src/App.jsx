@@ -76,9 +76,9 @@ const AuditTool = () => {
   const calculateRecommendations = () => {
     const recommendations = [];
     const callDelay = parseInt(formData.callbackDelay) || 0;
+    const contactDelay = parseInt(formData.firstContactDelay) || 0;
     const relances = parseInt(formData.numRelances) || 0;
     const quoteDelay = parseInt(formData.quoteDelay) || 0;
-    const contactDelay = parseInt(formData.firstContactDelay) || 0;
     if (callDelay > 24 || !formData.processClarity) recommendations.push("Lead Speed™");
     if (relances < 5) recommendations.push("Follow-Up Machine™");
     if (quoteDelay > 2) recommendations.push("Devis Fastlane™");
@@ -111,7 +111,7 @@ const AuditTool = () => {
       insights.push({
         section: "VÉLOCITÉ COMMERCIALE",
         title: "Délai de rappel critique",
-        problem: `Délai de ${callDelay}h. Répondre en <5 min = 100x plus de conversion.`,
+        problem: `Votre délai moyen de ${callDelay}h est catastrophique.`,
         impact: `Perte ~${Math.round(leadsPerMonth * 0.8)} leads/mois = €${Math.round(leadsPerMonth * 0.8 * dealValue * 12).toLocaleString()}/an`,
         solution: "Lead Speed™ < 10 min = +45% qualification",
         action: "GRATUIT: Notifications push + SLA < 2h"
@@ -121,7 +121,7 @@ const AuditTool = () => {
       insights.push({
         section: "RELANCES",
         title: "80% des ventes = 5+ tentatives",
-        problem: `Seulement ${relances} relance(s). Vous laissez 60% du CA.`,
+        problem: `Seulement ${relances} relance(s).`,
         impact: `€${Math.round(leadsPerMonth * 0.6 * dealValue * 12).toLocaleString()}/an perdu`,
         solution: "Follow-Up Machine™: J+1, J+3, J+7, J+14",
         action: "GRATUIT: Checklist + rappels fixes"
@@ -161,24 +161,32 @@ const AuditTool = () => {
     const uplift = 0.2;
     const annualGains = currentMonthlyRevenue * uplift * 12;
     const roiPercentage = Math.round(((annualGains - totalCost) / totalCost) * 100);
+    const breakEvenMonths = Math.round(totalCost / (currentMonthlyRevenue * uplift));
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 p-6">
-        <div className="max-w-5xl mx-auto space-y-8">
-          <h1 className="text-4xl font-bold text-indigo-600">Rapport Final</h1>
-          <div className="bg-white p-8 rounded-xl shadow-lg">
-            <p className="text-6xl font-bold text-indigo-600">{healthScore}%</p>
-            <p>Maturité RevOps</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
+        <div className="max-w-5xl mx-auto px-6 py-12 space-y-8">
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <h1 className="text-4xl font-bold text-indigo-600 mb-2">Rapport d'Audit RevOps</h1>
+            <p className="text-gray-600">Analyse stratégique niveau McKinsey</p>
           </div>
-          <button className="bg-indigo-600 text-white px-8 py-4 rounded-lg text-xl font-bold w-full">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-indigo-200 rounded-xl p-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div><h3 className="text-xl font-bold text-gray-800 mb-2">Score Maturité RevOps</h3></div>
+              <div className="text-right"><div className="text-5xl font-bold text-indigo-600">{healthScore}%</div></div>
+            </div>
+          </div>
+          <button className="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg w-full">
             Réserver appel gratuit
           </button>
-          <button onClick={() => { setShowResults(false); setCurrentStep(0); localStorage.removeItem('auditData'); }} className="text-indigo-600 flex items-center gap-2 mx-auto">
-            <RefreshCw className="w-5 h-5" /> Relancer
-          </button>
-          <button onClick={handlePrint} className="text-indigo-600 flex items-center gap-2 mx-auto">
-            <Download className="w-5 h-5" /> PDF
-          </button>
+          <div className="text-center pt-8 border-t border-gray-200 flex justify-center gap-4">
+            <button onClick={() => { setShowResults(false); setCurrentStep(0); localStorage.removeItem('auditData'); }} className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium">
+              <RefreshCw className="w-4 h-4" /> Relancer audit
+            </button>
+            <button onClick={handlePrint} className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium">
+              <Download className="w-4 h-4" /> Télécharger PDF
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -188,33 +196,42 @@ const AuditTool = () => {
   const progress = ((currentStep + 1) / sections.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 p-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold">Audit RevOps ENR</h1>
-        <div className="bg-white p-8 rounded-xl mt-6 shadow-lg">
-          <h2 className="text-2xl font-bold">{section.title}</h2>
-          <div className="w-full bg-gray-200 h-3 rounded-full mt-3">
-            <div className="bg-indigo-600 h-3 rounded-full transition-all" style={{ width: `${progress}%` }}></div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
+      <div className="max-w-4xl mx-auto px-6 py-12">
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Audit RevOps Gratuit - Niveau McKinsey</h1>
+          <p className="text-gray-600">Identifiez vos leviers de valeur en autopilot</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-lg p-8 space-y-8">
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-2xl font-bold text-gray-800">{section.title}</h2>
+              <span className="text-sm font-medium text-gray-600">{currentStep + 1}/{sections.length}</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-indigo-600 h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
+            </div>
           </div>
-          <div className="mt-8 space-y-6">
-            {section.questions.map(q => (
-              <div key={q.id}>
-                <label className="block font-semibold text-gray-700">{q.label}</label>
-                {q.type === "yesno" ? (
-                  <div className="flex gap-4 mt-3">
-                    <button onClick={() => handleInputChange(q.id, true)} className={`flex-1 py-3 rounded-lg font-bold transition ${formData[q.id] === true ? 'bg-indigo-600 text-white' : 'bg-gray-100'}`}>Oui</button>
-                    <button onClick={() => handleInputChange(q.id, false)} className={`flex-1 py-3 rounded-lg font-bold transition ${formData[q.id] === false ? 'bg-red-600 text-white' : 'bg-gray-100'}`}>Non</button>
+          <div className="space-y-6">
+            {section.questions.map((q) => (
+              <div key={q.id} className="space-y-2">
+                <label className="block text-gray-800 font-medium">{q.label}</label>
+                {q.type === "yesno" && (
+                  <div className="flex gap-3">
+                    <button onClick={() => handleInputChange(q.id, true)} className={`flex-1 py-3 px-4 rounded-lg border-2 font-medium transition ${formData[q.id] === true ? "border-indigo-600 bg-indigo-50" : "border-gray-200"}`}>Oui</button>
+                    <button onClick={() => handleInputChange(q.id, false)} className={`flex-1 py-3 px-4 rounded-lg border-2 font-medium transition ${formData[q.id] === false ? "border-red-600 bg-red-50" : "border-gray-200"}`}>Non</button>
                   </div>
-                ) : (
-                  <input type={q.type} value={formData[q.id]} onChange={e => handleInputChange(q.id, e.target.value)} className="w-full mt-3 p-3 border rounded-lg focus:border-indigo-600" />
+                )}
+                {(q.type === "text" || q.type === "number") && (
+                  <input type={q.type} value={formData[q.id]} onChange={(e) => handleInputChange(q.id, e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-600" />
                 )}
               </div>
             ))}
           </div>
-          <div className="flex gap-4 mt-8">
-            {currentStep > 0 && <button onClick={() => setCurrentStep(s => s - 1)} className="flex-1 py-3 border rounded-lg">Retour</button>}
-            <button onClick={() => currentStep === sections.length - 1 ? setShowResults(true) : setCurrentStep(s => s + 1)} className="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-bold">
-              {currentStep === sections.length - 1 ? "Voir résultats" : "Suivant"} <ChevronRight className="inline w-5 h-5" />
+          <div className="flex gap-4 pt-6">
+            {currentStep > 0 && (<button onClick={() => setCurrentStep(currentStep - 1)} className="flex-1 py-3 px-4 rounded-lg border-2 border-gray-300 font-medium">Retour</button>)}
+            <button onClick={() => { if (currentStep < sections.length - 1) setCurrentStep(currentStep + 1); else setShowResults(true); }} className="flex-1 py-3 px-4 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 flex items-center justify-center gap-2">
+              {currentStep === sections.length - 1 ? "Voir résultats" : "Suivant"} <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
